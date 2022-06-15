@@ -4,7 +4,6 @@ const bodyParser = require ('body-parser');
 const mongoose = require("mongoose");
 const encrypt = require('mongoose-encryption');
 
-
 const app = express();
 
 app.set('view engine', 'ejs'); 
@@ -48,7 +47,7 @@ app.post('/login', function (req, res) {
         }
     })
     //res.send(`Nice ${email} you have been registered, you would be redirected in few second`);
-})
+});
 
 
 app.get('/register', function(req, res){
@@ -72,10 +71,10 @@ app.post('/register', function (req, res) {
     });
     //res.send(`Nice ${email} you have been registered, you would be redirected in few second`);
     
-})
+});
 
 
 
 app.listen(3000, function() {
     console.log("server started on port 3000")
-})
+});
