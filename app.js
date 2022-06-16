@@ -2,7 +2,10 @@ require('dotenv').config();
 const express = require ('express');
 const bodyParser = require ('body-parser');
 const mongoose = require("mongoose");
-const encrypt = require('mongoose-encryption');
+const bcrypt = require('bcrypt');
+const saltRound = 10;
+//const md5 = require('md5')
+//const encrypt = require('mongoose-encryption');
 
 const app = express();
 
@@ -17,12 +20,6 @@ const userSchema = new mongoose.Schema({
     password: String
 });
 
-//const secret = process.env.SECRET;
-
-
-//add encryption package to the user schema, define the secret use to encrypt and also the field we actually want to encrypt 
-userSchema.plugin(encrypt, {secret: process.env.SECRET, encryptedFields: ['password']});
-
 const User = new mongoose.model('User', userSchema);
 
 app.get('/', function(req, res){
@@ -34,19 +31,27 @@ app.get('/login', function(req, res){
 });
 
 app.post('/login', function (req, res) {
-    const email = req.body.username;
-    const passWord = req.body.password;
 
-    User.findOne({email: email}, function(err, foundUser){
-        if(foundUser){
-            if(passWord === foundUser.password) {
-                res.render('secrets')
-            }
-        } else{
+    //const email = req.body.username;
+    //const password = req.body.password;
+
+    User.findOne({email: req.body.username}, function(err, foundUser){
+        
+        if(err){
             console.log(err);
+        } else{
+            if(foundUser){
+                bcrypt.compare(req.body.password, foundUser.password, function(error, result) {
+                    if(result === true) {
+                        res.render('secrets')
+                    } else{
+                        console.log(error);
+                    }
+                });    
+            }
         }
+        
     })
-    //res.send(`Nice ${email} you have been registered, you would be redirected in few second`);
 });
 
 
@@ -55,20 +60,22 @@ app.get('/register', function(req, res){
 });
 
 app.post('/register', function (req, res) {
-    const email = req.body.username;
-    const passWord = req.body.password;
+    //const passWord = req.body.password;
+    bcrypt.hash(req.body.password, saltRound, function(err, hash){
+        const user = new User({
+            email: req.body.username,
+            password: hash
+        })
 
-    const user = new User({
-        email: email,
-        password: passWord
+        user.save(function(err) {
+            if(!err){
+                res.render('secrets')
+            } else{
+                console.log(err);
+            }
+        });
     })
-    user.save(function(err) {
-        if(!err){
-            res.render('secrets')
-        } else{
-            console.log(err);
-        }
-    });
+
     //res.send(`Nice ${email} you have been registered, you would be redirected in few second`);
     
 });

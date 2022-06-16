@@ -156,3 +156,7 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+-----------------------    ENCRYPTION    -----------------------------
+////add encryption package to the user schema, define the secret use to encrypt and also the field we actually want to encrypt 
+userSchema.plugin(encrypt, {secret: process.env.SECRET, encryptedFields: ['password']});
